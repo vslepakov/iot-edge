@@ -1,0 +1,144 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "modules": {
+          "azureblobstorageoniotedge": {
+            "settings": {
+              "image": "mcr.microsoft.com/azure-blob-storage:latest",
+              "createOptions": {
+                "Env": [
+                  "LOCAL_STORAGE_ACCOUNT_NAME=<YOUR LOCAL STORAGE ACCOUNT NAME>",
+                  "LOCAL_STORAGE_ACCOUNT_KEY=<YOUR LOCAL STORAGE ACCOUNT KEY>"
+                ],
+                "HostConfig": {
+                  "Binds": [
+                    "/tmp/edgeblobvolume:/blobroot"
+                  ],
+                  "PortBindings": {
+                    "11002/tcp": [
+                      {
+                        "HostPort": "11002"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "type": "docker",
+            "version": "1.0",
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "blobarchivermodule": {
+            "settings": {
+              "image": "vslepakov/blobarchivermodule:0.0.2-amd64",
+              "createOptions": ""
+            },
+            "type": "docker",
+            "version": "1.0",
+            "env": {
+              "BLOB_STORAGE_CONNECTION_STR": {
+                "value": "<YOUR LOCAL STORAGE CONNECTION STRING>"
+              }
+            },
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "simulatedtemperaturesensor": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
+              "createOptions": ""
+            },
+            "type": "docker",
+            "version": "1.0",
+            "env": {
+              "MessageCount": {
+                "value": "100"
+              }
+            },
+            "status": "running",
+            "restartPolicy": "always"
+          }
+        },
+        "runtime": {
+          "settings": {
+            "minDockerVersion": "v1.25"
+          },
+          "type": "docker"
+        },
+        "schemaVersion": "1.0",
+        "systemModules": {
+          "edgeAgent": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": ""
+            },
+            "type": "docker"
+          },
+          "edgeHub": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ],
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always"
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "routes": {
+          "route": "FROM /messages/modules/simulatedtemperaturesensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/blobarchivermodule/inputs/input1\")"
+        },
+        "schemaVersion": "1.0",
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "azureblobstorageoniotedge": {
+      "properties.desired": {
+        "deviceAutoDeleteProperties": {
+          "deleteOn": true,
+          "deleteAfterMinutes": 20,
+          "retainWhileUploading": true
+        },
+        "deviceToCloudUploadProperties": {
+          "uploadOn": true,
+          "uploadOrder": "OldestFirst",
+          "cloudStorageConnectionString": "<YOUR CLOUD STORAGE CONNECTION STRING>",
+          "storageContainersForUpload": {
+            "<YOUR LOCAL STORAGE BLOB CONTAINER NAME>": {
+              "target": "<YOUR CLOUD STORAGE BLOB CONTAINER NAME>"
+            }
+          },
+          "deleteAfterUpload": false
+        }
+      }
+    }
+  }
+}
