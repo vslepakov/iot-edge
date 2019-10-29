@@ -1,0 +1,166 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "<YOUR_CONTAINER_REGISTRY_NAME>": {
+                "username": "$CONTAINER_REGISTRY_USERNAME_<YOUR_CONTAINER_REGISTRY_NAME>",
+                "password": "$CONTAINER_REGISTRY_PASSWORD_<YOUR_CONTAINER_REGISTRY_NAME>",
+                "address": "<YOUR_CONTAINER_REGISTRY>"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "EventGridPublisherModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.EventGridPublisherModule.debug}",
+              "createOptions": {
+                "Env": [
+                  "EVENT_GRID_SAS_KEY=<PUT YOUR SAS KEY HERE>",
+                  "LOCAL_EVENT_GRID_URI=https://eventgridmodule:4438",
+                  "TOPIC_NAME=edgetopic"
+                ]
+              }
+            }
+          },
+          "SimulatedTemperatureSensor": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
+              "createOptions": {}
+            }
+          },
+          "eventgridmodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
+              "createOptions": {
+                "Env": [
+                  "inbound:serverAuth:tlsPolicy=strict",
+                  "inbound:serverAuth:serverCert:source=IoTEdge",
+                  "inbound:clientAuth:sasKeys:enabled=true",
+                  "inbound:clientAuth:sasKeys:key1=<PUT YOUR SAS KEY HERE>",
+                  "inbound:clientAuth:clientCert:enabled=false",
+                  "inbound:clientAuth:clientCert:source=IoTEdge",
+                  "inbound:clientAuth:clientCert:allowUnknownCA=true",
+                  "outbound:clientAuth:clientCert:enabled=false",
+                  "outbound:clientAuth:clientCert:source=IoTEdge",
+                  "outbound:webhook:httpsOnly=false",
+                  "outbound:webhook:skipServerCertValidation=false",
+                  "outbound:webhook:allowUnknownCA=true"
+                ],
+                "HostConfig": {
+                  "PortBindings": {
+                    "4438/tcp": [
+                      {
+                        "HostPort": "4438"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "eventgridsubscribermodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.EventGridSubscriberModule.debug}",
+              "createOptions": {
+                "Env": [
+                  "EVENT_GRID_SAS_KEY=<PUT YOUR SAS KEY HERE>",
+                  "LOCAL_EVENT_GRID_URI=https://eventgridmodule:4438",
+                  "WEBHOOK_URL=http://eventgridsubscribermodule:9898/api/values",
+                  "TOPIC_NAME=edgetopic",
+                  "CLOUD_EVENTGRID_ENDPOINT=",
+                  "CLOUD_EVENTGRID_SAS_KEY=",
+                  "EDGEHUB_OUTPUT_NAME=edgehub",
+                  "ASPNETCORE_URLS=http://+:9898"
+                ],
+                "HostConfig": {
+                  "PortBindings": {
+                    "9898/tcp": [
+                      {
+                        "HostPort": "9898"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "sensorToEventGridPublisherModule": "FROM /messages/modules/SimulatedTemperatureSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/EventGridPublisherModule/inputs/input1\")",
+          "eventgridmofuleToEdgeHub": "FROM /messages/modules/eventgridmodule/outputs/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    }
+  }
+}
