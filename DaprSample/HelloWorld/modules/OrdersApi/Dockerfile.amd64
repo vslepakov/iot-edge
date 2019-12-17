@@ -1,0 +1,18 @@
+FROM node:8-stretch-slim
+
+WORKDIR /app/
+
+COPY package*.json ./
+
+RUN npm install --production
+
+COPY app.js ./
+
+RUN apt-get update && apt-get install -y procps
+RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+RUN wget https://github.com/dapr/dapr/releases/download/v0.3.0/daprd_linux_amd64.tar.gz
+RUN tar -zxvf daprd_linux_amd64.tar.gz
+
+ENV PATH /app:$PATH
+
+CMD ["dapr", "run", "--app-id", "nodeapp", "--app-port", "8181", "--port", "3500", "node", "app.js"]

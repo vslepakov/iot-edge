@@ -1,0 +1,135 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "vislepakdemoacr": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "<YOUR CONTAINER REGISTRY>"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0.9-rc3",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0.9-rc3",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "OrdersApi": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.OrdersApi}",
+              "createOptions": {
+                "NetworkingConfig": {
+                  "EndpointsConfig": {
+                    "host": {}
+                  }
+                },
+                "HostConfig": {
+                  "NetworkMode": "host"
+                }
+              }
+            }
+          },
+          "DaprRuntime": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "daprio/dapr",
+              "createOptions": {
+                "Cmd": [
+                  "./placement"
+                ],
+                "HostConfig": {
+                  "PortBindings": {
+                    "50005/tcp": [
+                      {
+                        "HostPort": "6050"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "Redis": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "redis",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "6379/tcp": [
+                      {
+                        "HostPort": "6379"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {},
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    }
+  }
+}
