@@ -13,7 +13,7 @@
               "vislepakdemoacr": {
                 "username": "$CONTAINER_REGISTRY_USERNAME",
                 "password": "$CONTAINER_REGISTRY_PASSWORD",
-                "address": "<YOUR CONTAINER REGISTRY>"
+                "address": "<YOUR VALUE HERE>"
               }
             }
           }
@@ -115,6 +115,25 @@
                       }
                     ]
                   }
+                }
+              }
+            }
+          },
+          "OrdersApiClient": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.OrdersApiClient}",
+              "createOptions": {
+                "NetworkingConfig": {
+                  "EndpointsConfig": {
+                    "host": {}
+                  }
+                },
+                "HostConfig": {
+                  "NetworkMode": "host"
                 }
               }
             }

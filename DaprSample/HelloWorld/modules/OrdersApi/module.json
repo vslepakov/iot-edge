@@ -2,7 +2,7 @@
     "$schema-version": "0.0.1",
     "description": "",
     "image": {
-        "repository": "<YOUR CONTAINER REGISTRY>/ordersapi",
+        "repository": "<YOUR VALUE HERE>/ordersapi",
         "tag": {
             "version": "0.0.1",
             "platforms": {
