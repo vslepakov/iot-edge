@@ -13,7 +13,7 @@
               "vislepakdemoacr": {
                 "username": "$CONTAINER_REGISTRY_USERNAME",
                 "password": "$CONTAINER_REGISTRY_PASSWORD",
-                "address": "<YOUR VALUE HERE>"
+                "address": "<YOUR VALUE>"
               }
             }
           }
@@ -72,29 +72,6 @@
                 },
                 "HostConfig": {
                   "NetworkMode": "host"
-                }
-              }
-            }
-          },
-          "DaprRuntime": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "daprio/dapr",
-              "createOptions": {
-                "Cmd": [
-                  "./placement"
-                ],
-                "HostConfig": {
-                  "PortBindings": {
-                    "50005/tcp": [
-                      {
-                        "HostPort": "6050"
-                      }
-                    ]
-                  }
                 }
               }
             }

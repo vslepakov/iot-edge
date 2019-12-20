@@ -6,13 +6,18 @@ COPY package*.json ./
 
 RUN npm install --production
 
-COPY app.js ./
+COPY app.js runWithDapr.sh ./
+COPY components ./components/
 
-RUN apt-get update && apt-get install -y procps
-RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+RUN chmod +x runWithDapr.sh
+
+RUN apt-get update \
+    && apt-get install -y procps \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN wget https://github.com/dapr/dapr/releases/download/v0.3.0/daprd_linux_amd64.tar.gz
 RUN tar -zxvf daprd_linux_amd64.tar.gz
 
 ENV PATH /app:$PATH
 
-CMD ["dapr", "run", "--app-id", "nodeapp", "--app-port", "8181", "--port", "3500", "node", "app.js"]
+CMD ["/bin/bash", "runWithDapr.sh", "nodeapp", "8181"]
