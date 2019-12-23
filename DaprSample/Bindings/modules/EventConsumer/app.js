@@ -3,14 +3,22 @@ const bodyParser = require('body-parser');
 require('isomorphic-fetch');
 
 const app = express();
-app.use(bodyParser.json());
+
+// Dapr publishes messages with the application/cloudevents+json content-type
+app.use(bodyParser.json({ type: 'application/*+json' }));
 
 const port = 3000;
 
+app.get('/dapr/subscribe', (_req, res) => {
+  res.json([
+    'my-rabbit'
+  ]);
+});
+
 app.post('/my-rabbit', (req, res) => {
-  console.log("Hello from RabbitMQ!");
+  console.log("Event from RabbitMQ: ")
   console.log(req.body);
-  res.status(200).send();
+  res.sendStatus(200);
 });
 
 app.listen(port, () => console.log(`Node App listening on port ${port}!`));
