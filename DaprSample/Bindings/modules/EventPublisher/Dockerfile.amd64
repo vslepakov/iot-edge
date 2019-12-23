@@ -1,0 +1,21 @@
+FROM python:3.7-slim-stretch
+
+WORKDIR /app
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+COPY . .
+RUN chmod +x runWithDapr.sh
+
+RUN apt-get update \
+    && apt-get install -y procps \
+    && apt-get install -y wget \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget https://github.com/dapr/dapr/releases/download/v0.3.0/daprd_linux_amd64.tar.gz
+RUN tar -zxvf daprd_linux_amd64.tar.gz
+
+ENV PATH /app:$PATH
+
+CMD ["/bin/bash", "runWithDapr.sh", "bindings-pythonapp"]
