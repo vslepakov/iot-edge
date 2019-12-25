@@ -13,7 +13,7 @@
               "vislepakdemoacr": {
                 "username": "$CONTAINER_REGISTRY_USERNAME",
                 "password": "$CONTAINER_REGISTRY_PASSWORD",
-                "address": "<YOUR VALUE>"
+                "address": "<YOUR VALUE HERE>"
               }
             }
           }
@@ -64,16 +64,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "${MODULES.EventConsumer}",
-              "createOptions": {
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                },
-                "HostConfig": {
-                  "NetworkMode": "host"
-                }
-              }
+              "createOptions": {}
             }
           },
           "EventPublisher": {
@@ -83,16 +74,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "${MODULES.EventPublisher}",
-              "createOptions": {
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                },
-                "HostConfig": {
-                  "NetworkMode": "host"
-                }
-              }
+              "createOptions": {}
             }
           },
           "RabbitMQ": {
@@ -110,11 +92,6 @@
                       {
                         "HostPort": "15672"
                       }
-                    ],
-                    "5672/tcp": [
-                      {
-                        "HostPort": "5672"
-                      }
                     ]
                   }
                 }
@@ -128,17 +105,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "redis",
-              "createOptions": {
-                "HostConfig": {
-                  "PortBindings": {
-                    "6379/tcp": [
-                      {
-                        "HostPort": "6379"
-                      }
-                    ]
-                  }
-                }
-              }
+              "createOptions": {}
             }
           }
         }
