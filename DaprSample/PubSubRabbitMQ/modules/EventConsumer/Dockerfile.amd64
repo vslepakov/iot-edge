@@ -20,4 +20,4 @@ RUN tar -zxvf daprd_linux_amd64.tar.gz
 
 ENV PATH /app:$PATH
 
-CMD ["/bin/bash", "runWithDapr.sh", "bindings-nodeapp", "3000"]
+CMD ["/bin/bash", "runWithDapr.sh", "nodeapp", "3000"]

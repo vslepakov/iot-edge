@@ -6,7 +6,7 @@ spec:
   type: pubsub.rabbitmq
   metadata:
     - name: host
-      value: amqp://guest:guest@127.0.0.1:5672
+      value: amqp://guest:guest@RabbitMQ:5672
     - name: consumerID
       value: myConsumerID
     - name: durable

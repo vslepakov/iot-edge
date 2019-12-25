@@ -18,4 +18,4 @@ RUN tar -zxvf daprd_linux_amd64.tar.gz
 
 ENV PATH /app:$PATH
 
-CMD ["/bin/bash", "runWithDapr.sh", "bindings-pythonapp"]
+CMD ["/bin/bash", "runWithDapr.sh", "pythonapp"]
