@@ -1,0 +1,31 @@
+FROM vslepakov/edgeactors-common AS build-env
+WORKDIR /app/sensoractor
+
+COPY *.csproj ./
+RUN dotnet restore
+
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+    && apt-get install -y procps \
+    && apt-get install -y wget \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget https://github.com/dapr/dapr/releases/download/v0.6.0/daprd_linux_amd64.tar.gz
+RUN tar -zxvf daprd_linux_amd64.tar.gz
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim
+WORKDIR /app
+COPY --from=build-env /app/sensoractor/out ./
+COPY --from=build-env /app/sensoractor/daprd ./
+COPY components ./components/
+COPY runWithDapr.sh ./
+
+RUN chmod +x runWithDapr.sh
+
+ENV PATH /app:$PATH
+
+CMD ["/bin/bash", "runWithDapr.sh"]

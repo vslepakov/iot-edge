@@ -1,0 +1,6 @@
+# Preparing this base image to avoid errors like "COPY failed: Forbidden path outside the build context"
+# When trying to build a module image using the IoT Edge VSCode extension (cannot move Dockerfile somewhere else)
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster
+WORKDIR /common
+
+COPY SensorActor.Interfaces ./SensorActor.Interfaces
