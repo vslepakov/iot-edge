@@ -2,7 +2,7 @@
 
 ## Related Blog Posts:
 - https://medium.com/@vslepakov/dapr-on-azure-iot-edge-31c7020c8cda
-- TODO
+- https://medium.com/@vslepakov/dapr-actors-on-azure-iot-edge-65782d0fcf23
 
 ## Samples
 - [Hello World sample](./HelloWorld)
