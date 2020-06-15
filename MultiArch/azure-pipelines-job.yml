@@ -1,0 +1,26 @@
+parameters:
+  vmImage: "ubuntu-latest"
+  timeout: 60
+
+jobs:
+  - job: ${{ parameters.arch }}
+    displayName: Build ${{ parameters.arch }}
+    timeoutInMinutes: ${{ parameters.timeout }}
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    variables:
+      ARCH: ${{ parameters.arch }}
+      DOCKER: docker --config=~/.docker
+      REPOSITORY: ${{ parameters.repository }}
+    steps:
+      - script: |
+          echo "==> Setting up QEMU"
+          $(DOCKER) run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        displayName: Setup ${{ parameters.arch }}
+      - script: |
+          $(DOCKER) build -t $(REPOSITORY):$(Build.BuildId)-$(ARCH) --build-arg ARCH=$(ARCH)/ .
+        displayName: Build ${{ parameters.arch }}
+      - script: |
+          echo ${{ parameters.password }} | $(DOCKER) login --username ${{ parameters.username }} --password-stdin
+          $(DOCKER) push $(REPOSITORY):$(Build.BuildId)-$(ARCH)
+        displayName: Push ${{ parameters.arch }}

@@ -1,0 +1,72 @@
+trigger:
+  - master
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  - name: DOCKER_REPOSITORY
+    value: $(DOCKER_USERNAME)/multiarch-sample
+
+stages:
+  - stage: amd64
+    displayName: amd64 (Intel/AMD)
+    dependsOn: []
+    jobs:
+      - template: azure-pipelines-job.yml
+        parameters:
+          arch: amd64
+          username: $(DOCKER_USERNAME)
+          password: $(DOCKER_PASSWORD)
+          repository: $(DOCKER_REPOSITORY)
+
+  - stage: arm32v7
+    displayName: arm32v7 (Pi 2+ and other armhf)
+    dependsOn: []
+    jobs:
+      - template: azure-pipelines-job.yml
+        parameters:
+          arch: arm32v7
+          username: $(DOCKER_USERNAME)
+          password: $(DOCKER_PASSWORD)
+          repository: $(DOCKER_REPOSITORY)
+
+  - stage: arm64v8
+    displayName: arm64v8 (Pi 3+ and other ARM64)
+    dependsOn: []
+    jobs:
+      - template: azure-pipelines-job.yml
+        parameters:
+          arch: arm64v8
+          username: $(DOCKER_USERNAME)
+          password: $(DOCKER_PASSWORD)
+          repository: $(DOCKER_REPOSITORY)
+
+  - stage: Manifest
+    displayName: multi-arch manifest
+    dependsOn:
+      - amd64
+      - arm32v7
+      - arm64v8
+    variables:
+      - name: DOCKER
+        value: docker --config=~/.docker
+      - name: DOCKER_CLI_EXPERIMENTAL
+        value: enabled
+    jobs:
+      - job: Manifest
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - script: |
+              echo $(DOCKER_PASSWORD) | $(DOCKER) login --username $(DOCKER_USERNAME) --password-stdin
+              echo "==> Building multi-architecture manifest"
+              $(DOCKER) manifest create \
+              $(DOCKER_REPOSITORY):$(Build.BuildId) \
+              --amend $(DOCKER_REPOSITORY):$(Build.BuildId)-amd64 \
+              --amend $(DOCKER_REPOSITORY):$(Build.BuildId)-arm32v7 \
+              --amend $(DOCKER_REPOSITORY):$(Build.BuildId)-arm64v8
+            displayName: Building manifest
+          - script: |
+              $(DOCKER) manifest push $(DOCKER_REPOSITORY):$(Build.BuildId)
+            displayName: Pushing manifest
