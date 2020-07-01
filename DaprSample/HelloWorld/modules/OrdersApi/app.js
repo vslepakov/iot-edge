@@ -11,7 +11,8 @@ const app = express();
 app.use(bodyParser.json());
 
 const daprPort = process.env.DAPR_HTTP_PORT || 3501;
-const stateUrl = `http://localhost:${daprPort}/v1.0/state`;
+// statestore is the name of the component in the redis.yaml file
+const stateUrl = `http://localhost:${daprPort}/v1.0/state/statestore`;
 const port = 8181;
 
 app.get('/order', (_req, res) => {
