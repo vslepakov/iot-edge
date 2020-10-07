@@ -1,0 +1,29 @@
+[
+    {
+        "NodeId": "http://www.prosysopc.com/OPCUA/SimulationNodes#s=Counter",
+        "ApplicationUri": "urn:opcua-srv.i2uvk10rqycefadk3kvhbmhdgc.ax.internal.cloudapp.net:OPCUA:SimulationServer",
+        "DisplayName": "Counter",
+        "Value": {
+            "Value": 5,
+            "SourceTimestamp": "2020-10-06T14:28:57Z"
+        }
+    },
+    {
+        "NodeId": "http://www.prosysopc.com/OPCUA/SimulationNodes#s=Counter",
+        "ApplicationUri": "urn:opcua-srv.i2uvk10rqycefadk3kvhbmhdgc.ax.internal.cloudapp.net:OPCUA:SimulationServer",
+        "DisplayName": "Counter",
+        "Value": {
+            "Value": 3,
+            "SourceTimestamp": "2020-10-06T14:18:57Z"
+        }
+    },
+    {
+        "NodeId": "http://www.prosysopc.com/OPCUA/SimulationNodes#s=Temperature",
+        "ApplicationUri": "urn:opcua-srv.i2uvk10rqycefadk3kvhbmhdgc.ax.internal.cloudapp.net:OPCUA:SimulationServer",
+        "DisplayName": "Temperature",
+        "Value": {
+            "Value": 10,
+            "SourceTimestamp": "2020-10-06T14:29:02Z"
+        }
+    }
+]

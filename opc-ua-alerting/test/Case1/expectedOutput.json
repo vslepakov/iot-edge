@@ -1,0 +1,2 @@
+{"AlertText":"ThresholdViolationAlert","NodeId":"http://www.prosysopc.com/OPCUA/SimulationNodes#s=Counter","AverageValue":5.0}
+{"AlertText":"ThresholdViolationAlert","NodeId":"http://www.prosysopc.com/OPCUA/SimulationNodes#s=Temperature","AverageValue":10.0}

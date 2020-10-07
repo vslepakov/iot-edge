@@ -1,0 +1,10 @@
+{
+    "NodeId": "http://www.prosysopc.com/OPCUA/SimulationNodes#s=Counter",
+    "DisplayName": "Counter",
+    "Value": 4
+},
+{
+    "NodeId": "http://www.prosysopc.com/OPCUA/SimulationNodes#s=Temperature",
+    "DisplayName": "Temperature",
+    "Value": 4
+}

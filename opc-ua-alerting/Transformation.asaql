@@ -1,0 +1,25 @@
+WITH 
+TagsQuery AS (
+	SELECT
+		NodeId,
+        Value
+	FROM
+		"opc-ua"
+),
+ThresholdViolationsQuery AS (
+    SELECT
+        TagsQuery.NodeId as NodeId,
+        TagsQuery.Value as Value
+    FROM 
+        TagsQuery
+    JOIN thresholds ON TagsQuery.NodeId = thresholds.NodeId
+    WHERE TagsQuery.Value.Value > thresholds.Value
+)
+
+SELECT
+    'ThresholdViolationAlert' as AlertText,
+    NodeId,
+    AVG(ThresholdViolationsQuery.Value.Value) as AverageValue
+INTO alert
+FROM ThresholdViolationsQuery
+GROUP BY NodeId, TumblingWindow(second, 30)

@@ -1,0 +1,26 @@
+{
+    "name": "alertting",
+    "startFile": "Transformation.asaql",
+    "configurations": [
+        {
+            "filePath": "JobConfig.json",
+            "subType": "JobConfig"
+        },
+        {
+            "filePath": "Inputs/opc-ua.json",
+            "subType": "Input"
+        },
+        {
+            "filePath": "Inputs/thresholds.json",
+            "subType": "Input"
+        },
+        {
+            "filePath": "Inputs/Local_opc-ua.json",
+            "subType": "InputMock"
+        },
+        {
+            "filePath": "Inputs/Local_thresholds.json",
+            "subType": "InputMock"
+        }
+    ]
+}

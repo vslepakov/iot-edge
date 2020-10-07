@@ -1,0 +1,13 @@
+{
+    "Name": "opc-ua",
+    "Type": "Data Stream",
+    "DataSourceType": "Invalid",
+    "DataSourceCredentialDomain": null,
+    "Serialization": {
+        "Type": "Json",
+        "Encoding": "UTF8",
+        "FieldDelimiter": null
+    },
+    "CompressionType": "None",
+    "ScriptType": "Input"
+}

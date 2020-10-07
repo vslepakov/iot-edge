@@ -1,0 +1,7 @@
+{
+    "InputAlias": "thresholds",
+    "Type": "Reference data",
+    "Format": "Json",
+    "FilePath": "../TestData/thresholds.json",
+    "ScriptType": "InputMock"
+}

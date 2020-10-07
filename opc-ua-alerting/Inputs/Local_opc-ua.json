@@ -1,0 +1,7 @@
+{
+    "InputAlias": "opc-ua",
+    "Type": "Data Stream",
+    "Format": "Json",
+    "FilePath": "../TestData/sample_asa_input.json",
+    "ScriptType": "InputMock"
+}

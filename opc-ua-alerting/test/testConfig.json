@@ -1,0 +1,31 @@
+{
+  "Script": "../Transformation.asaql",
+  "TestCases": [
+    {
+      "Name": "Case 1 - [Temperature and Counter alerts correctly identified]",
+      "Inputs": [
+        {
+          "InputAlias": "opc-ua",
+          "Type": "Data Stream",
+          "Format": "Json",
+          "FilePath": "../TestData/sample_asa_input.json",
+          "ScriptType": "InputMock"
+        },
+        {
+          "InputAlias": "thresholds",
+          "Type": "Reference data",
+          "Format": "Json",
+          "FilePath": "../TestData/thresholds.json",
+          "ScriptType": "InputMock"
+        }
+      ],
+      "ExpectedOutputs": [
+        {
+          "OutputAlias": "alert",
+          "FilePath": "Case1/expectedOutput.json",
+          "Required": true
+        }
+      ]
+    }
+  ]
+}

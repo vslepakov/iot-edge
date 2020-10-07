@@ -1,0 +1,12 @@
+{
+    "Name": "thresholds",
+    "Type": "Reference data",
+    "DataSourceType": "Invalid",
+    "DataSourceCredentialDomain": null,
+    "Serialization": {
+        "Type": "Json",
+        "Encoding": "UTF8",
+        "FieldDelimiter": null
+    },
+    "ScriptType": "Input"
+}
