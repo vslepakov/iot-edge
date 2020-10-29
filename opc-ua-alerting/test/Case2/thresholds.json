@@ -8,7 +8,7 @@
     {
         "NodeId": "http://www.prosysopc.com/OPCUA/SimulationNodes#s=Temperature",
         "DisplayName": "Temperature",
-        "ThresholdValue": 8,
+        "ThresholdValue": 14,
         "Tolerance": 2
     }
 ]

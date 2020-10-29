@@ -1,25 +1,34 @@
 WITH 
-TagsQuery AS (
-	SELECT
-		NodeId,
-        Value
-	FROM
-		"opc-ua"
-),
-ThresholdViolationsQuery AS (
-    SELECT
-        TagsQuery.NodeId as NodeId,
-        TagsQuery.Value as Value
-    FROM 
-        TagsQuery
-    JOIN thresholds ON TagsQuery.NodeId = thresholds.NodeId
-    WHERE TagsQuery.Value.Value > thresholds.Value
-)
-
-SELECT
-    'ThresholdViolationAlert' as AlertText,
+TagsQuery AS(
+SELECT 
     NodeId,
-    AVG(ThresholdViolationsQuery.Value.Value) as AverageValue
-INTO alert
-FROM ThresholdViolationsQuery
-GROUP BY NodeId, TumblingWindow(second, 30)
+    Value,
+    CAST(Value.SourceTimestamp as datetime) as SourceTimestamp 
+FROM 
+    [opc-ua] 
+--TIMESTAMP BY SourceTimestamp
+), 
+MinuteAverageQuery AS(
+SELECT 
+    TagsQuery.NodeId as NodeId,
+    AVG(TagsQuery.Value.Value) as AverageValue 
+FROM 
+    TagsQuery 
+GROUP BY 
+    TagsQuery.NodeId,
+    TumblingWindow(second, 60) 
+) 
+
+SELECT 
+    'ThresholdViolationAlert' as AlertText,
+    MinuteAverageQuery.AverageValue,
+    MinuteAverageQuery.NodeId 
+INTO alert 
+FROM 
+    MinuteAverageQuery 
+    JOIN thresholds 
+    ON MinuteAverageQuery.NodeId = thresholds.NodeId 
+WHERE 
+    MinuteAverageQuery.AverageValue > =(thresholds.ThresholdValue + thresholds.Tolerance) OR
+    MinuteAverageQuery.AverageValue < =(thresholds.ThresholdValue - thresholds.Tolerance) 
+

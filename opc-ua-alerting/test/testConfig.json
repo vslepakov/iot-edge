@@ -1,21 +1,21 @@
 {
-  "Script": "../Transformation.asaql",
+  "Script": "C:\\Projects\\IoT Edge Lab\\iot-edge-samples\\opc-ua-alerting\\Transformation.asaql",
   "TestCases": [
     {
-      "Name": "Case 1 - [Temperature and Counter alerts correctly identified]",
+      "Name": "Case 1 - [High Temperature and Counter alerts correctly identified]",
       "Inputs": [
         {
           "InputAlias": "opc-ua",
           "Type": "Data Stream",
           "Format": "Json",
-          "FilePath": "../TestData/sample_asa_input.json",
+          "FilePath": "Case1/input.json",
           "ScriptType": "InputMock"
         },
         {
           "InputAlias": "thresholds",
           "Type": "Reference data",
           "Format": "Json",
-          "FilePath": "../TestData/thresholds.json",
+          "FilePath": "Case1/thresholds.json",
           "ScriptType": "InputMock"
         }
       ],
@@ -23,6 +23,32 @@
         {
           "OutputAlias": "alert",
           "FilePath": "Case1/expectedOutput.json",
+          "Required": true
+        }
+      ]
+    },
+    {
+      "Name": "Case 2 - [Low Temperature and Counter alerts correctly identified]",
+      "Inputs": [
+        {
+          "InputAlias": "opc-ua",
+          "Type": "Data Stream",
+          "Format": "Json",
+          "FilePath": "Case2/input.json",
+          "ScriptType": "InputMock"
+        },
+        {
+          "InputAlias": "thresholds",
+          "Type": "Reference data",
+          "Format": "Json",
+          "FilePath": "Case2/thresholds.json",
+          "ScriptType": "InputMock"
+        }
+      ],
+      "ExpectedOutputs": [
+        {
+          "OutputAlias": "alert",
+          "FilePath": "Case2/expectedOutput.json",
           "Required": true
         }
       ]
