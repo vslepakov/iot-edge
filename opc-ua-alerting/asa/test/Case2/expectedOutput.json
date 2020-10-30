@@ -1,1 +1,1 @@
-{"AlertText":"ThresholdViolationAlert","AverageValue":11.0,"NodeId":"http://www.prosysopc.com/OPCUA/SimulationNodes#s=Temperature"}
+{"AlertText":"ThresholdViolationAlert","NodeId":"http://www.prosysopc.com/OPCUA/SimulationNodes#s=Temperature","ApplicationUri":"urn:opcua-srv.i2uvk10rqycefadk3kvhbmhdgc.ax.internal.cloudapp.net:OPCUA:SimulationServer","AverageValue":11.0}

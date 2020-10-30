@@ -3,6 +3,7 @@ TagsQuery AS(
 SELECT 
     NodeId,
     Value,
+    ApplicationUri,
     CAST(Value.SourceTimestamp as datetime) as SourceTimestamp 
 FROM 
     [opc-ua] 
@@ -10,20 +11,24 @@ FROM
 ), 
 MinuteAverageQuery AS(
 SELECT 
-    TagsQuery.NodeId as NodeId,
-    AVG(TagsQuery.Value.Value) as AverageValue 
+    NodeId,
+    ApplicationUri,
+    AVG(Value.Value) as AverageValue 
 FROM 
     TagsQuery 
 GROUP BY 
-    TagsQuery.NodeId,
+    ApplicationUri,
+    NodeId,
     TumblingWindow(second, 60) 
 ) 
 
 SELECT 
     'ThresholdViolationAlert' as AlertText,
-    MinuteAverageQuery.AverageValue,
-    MinuteAverageQuery.NodeId 
-INTO alert 
+    MinuteAverageQuery.NodeId as NodeId,
+    MinuteAverageQuery.ApplicationUri as ApplicationUri,
+    MinuteAverageQuery.AverageValue 
+INTO 
+    alert 
 FROM 
     MinuteAverageQuery 
     JOIN thresholds 
