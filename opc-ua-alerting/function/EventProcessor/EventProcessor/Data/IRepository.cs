@@ -7,7 +7,7 @@ namespace EventProcessor.Data
     {
         IQueryable<T> All { get; }
 
-        Task<T> AddAsync(T entity);
+        Task AddAsync(T entity);
 
         Task UpsertAsync(T entity);
 

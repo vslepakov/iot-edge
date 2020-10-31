@@ -16,14 +16,14 @@ namespace EventProcessor.Test
 
         public IQueryable<Alert> All { get; private set; }
 
-        public Task<Alert> AddAsync(Alert alert)
+        public Task AddAsync(Alert alert)
         {
             var all = All.ToList();
             all.Add(alert);
 
             All = all.AsQueryable();
 
-            return Task.FromResult(alert);
+            return Task.CompletedTask;
         }
 
         public Task DeleteAsync(Alert alert)

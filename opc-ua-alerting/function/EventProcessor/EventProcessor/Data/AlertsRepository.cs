@@ -21,13 +21,12 @@ namespace EventProcessor.Data
 
         public IQueryable<Alert> All => _documentClient.CreateDocumentQuery<Alert>(_collectionUri);
 
-        public async Task<Alert> AddAsync(Alert entity)
+        public async Task AddAsync(Alert entity)
         {
             try
             {
                 entity.id = Guid.NewGuid().ToString();
-                var document = await _documentClient.CreateDocumentAsync(_collectionUri, entity);
-                return JsonConvert.DeserializeObject<Alert>(document.ToString());
+                await _documentClient.CreateDocumentAsync(_collectionUri, entity);
             }
             catch (DocumentClientException e)
             {
