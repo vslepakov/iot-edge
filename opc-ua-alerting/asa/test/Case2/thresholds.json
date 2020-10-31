@@ -1,11 +1,13 @@
 [
     {
+        "ApplicationUri": "urn:opcua-srv.i2uvk10rqycefadk3kvhbmhdgc.ax.internal.cloudapp.net:OPCUA:SimulationServer",
         "NodeId": "http://www.prosysopc.com/OPCUA/SimulationNodes#s=Counter",
         "DisplayName": "Counter",
         "ThresholdValue": 4,
         "Tolerance": 0
     },
     {
+        "ApplicationUri": "urn:opcua-srv.i2uvk10rqycefadk3kvhbmhdgc.ax.internal.cloudapp.net:OPCUA:SimulationServer",
         "NodeId": "http://www.prosysopc.com/OPCUA/SimulationNodes#s=Temperature",
         "DisplayName": "Temperature",
         "ThresholdValue": 14,

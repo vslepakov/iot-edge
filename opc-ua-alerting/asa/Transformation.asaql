@@ -1,39 +1,31 @@
 WITH 
-TagsQuery AS(
-SELECT 
-    NodeId,
-    Value,
-    ApplicationUri,
-    CAST(Value.SourceTimestamp as datetime) as SourceTimestamp 
-FROM 
-    [opc-ua] 
---TIMESTAMP BY SourceTimestamp
-), 
-MinuteAverageQuery AS(
-SELECT 
-    NodeId,
-    ApplicationUri,
-    AVG(Value.Value) as AverageValue 
-FROM 
-    TagsQuery 
-GROUP BY 
-    ApplicationUri,
-    NodeId,
-    TumblingWindow(second, 60) 
-) 
+TagsQuery AS (
+	SELECT
+        Value,
+        ApplicationUri,
+        DisplayName
+	FROM
+		[opc-ua]
+),
+MinuteAverageQuery AS (
+    SELECT
+        DisplayName,
+        ApplicationUri,
+        AVG(Value.Value) as AverageValue
+    FROM 
+        TagsQuery
+    GROUP BY ApplicationUri, DisplayName, TumblingWindow(second, 60)
+)
 
-SELECT 
-    'ThresholdViolationAlert' as AlertText,
-    MinuteAverageQuery.NodeId as NodeId,
-    MinuteAverageQuery.ApplicationUri as ApplicationUri,
-    MinuteAverageQuery.AverageValue 
-INTO 
-    alert 
-FROM 
-    MinuteAverageQuery 
-    JOIN thresholds 
-    ON MinuteAverageQuery.NodeId = thresholds.NodeId 
+SELECT
+   'ThresholdViolationAlert' as AlertType,
+    System.Timestamp() as Timestamp,
+    MinuteAverageQuery.*
+INTO alert
+FROM MinuteAverageQuery
+JOIN thresholds ON 
+     MinuteAverageQuery.ApplicationUri = thresholds.ApplicationUri AND
+     MinuteAverageQuery.DisplayName = thresholds.DisplayName
 WHERE 
-    MinuteAverageQuery.AverageValue > =(thresholds.ThresholdValue + thresholds.Tolerance) OR
-    MinuteAverageQuery.AverageValue < =(thresholds.ThresholdValue - thresholds.Tolerance) 
-
+    MinuteAverageQuery.AverageValue >= (thresholds.ThresholdValue + thresholds.Tolerance) OR
+    MinuteAverageQuery.AverageValue <= (thresholds.ThresholdValue - thresholds.Tolerance)

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30608.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventProcessor", "EventProcessor\EventProcessor.csproj", "{C1DD43B1-A88D-4967-BACA-DBA6508EFE60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventProcessor", "EventProcessor\EventProcessor.csproj", "{C1DD43B1-A88D-4967-BACA-DBA6508EFE60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventProcessor.Test", "EventProcessor.Test\EventProcessor.Test.csproj", "{9429046E-E493-45DF-972B-1A30B8FB643E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C1DD43B1-A88D-4967-BACA-DBA6508EFE60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1DD43B1-A88D-4967-BACA-DBA6508EFE60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1DD43B1-A88D-4967-BACA-DBA6508EFE60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9429046E-E493-45DF-972B-1A30B8FB643E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9429046E-E493-45DF-972B-1A30B8FB643E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9429046E-E493-45DF-972B-1A30B8FB643E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9429046E-E493-45DF-972B-1A30B8FB643E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
