@@ -7,6 +7,8 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.CosmosDB" Version="3.0.7" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.EventGrid" Version="2.1.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.7" />
+    <PackageReference Include="Polly" Version="7.2.1" />
+    <PackageReference Include="Twilio" Version="5.48.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

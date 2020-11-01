@@ -31,9 +31,16 @@ namespace EventProcessor
 
             var databaseName = Environment.GetEnvironmentVariable("COSMOS_DB_DATABASE_NAME");
             var collectionName = Environment.GetEnvironmentVariable("COSMOS_DB_COLLECTION_NAME");
+            var twilioConfig = new TwilioConfiguration
+            {
+                ToPhoneNumber = Environment.GetEnvironmentVariable("ALERT_TO_PHONE_NUMBER"),
+                FromPhoneNumber = Environment.GetEnvironmentVariable("ALERT_FROM_PHONE_NUMBER"),
+                AccountSid = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID"),
+                AuthToken = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN")
+            };
 
             var alertsRepository = new AlertsRepository(client, databaseName, collectionName);
-            var handler = new AlertHandler(alertsRepository, new TwilioNotificationService(log), log);
+            var handler = new AlertHandler(alertsRepository, new TwilioNotificationService(twilioConfig, log), log);
             await handler.HandleAsync(newAlerts);
         }
     }
