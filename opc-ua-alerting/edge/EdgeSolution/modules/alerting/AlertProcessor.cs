@@ -1,0 +1,129 @@
+﻿using Microsoft.Azure.Devices.Client;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace alerting
+{
+    public class AlertProcessor
+    {
+        private readonly IModuleClientWrapper _moduleClientWrapper;
+        private readonly ILogger _logger;
+        private readonly ConcurrentDictionary<string, IList<OpcUaDataPoint>> _cachedItems;
+        IList<MonitoredItem> _monitoredItems;
+
+        public AlertProcessor(IModuleClientWrapper moduleClientWrapper, ILogger logger)
+        {
+            _moduleClientWrapper = moduleClientWrapper;
+            _logger = logger;
+            _cachedItems = new ConcurrentDictionary<string, IList<OpcUaDataPoint>>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        public void SetMonitoredItems(IList<MonitoredItem> monitoredItems)
+        {
+            if (Validate(monitoredItems))
+            {
+                _monitoredItems = monitoredItems;
+                _logger.LogInformation("Successfully applied new Monitored Items configuration");
+            }
+            else
+            {
+                _logger.LogError("Failed to apply new Monitored Items configuration");
+            }
+        }
+
+        public void HandleNewValues(IList<OpcUaDataPoint> dataPoints)
+        {
+            foreach (var dataPoint in dataPoints.Where(IsMonitored))
+            {
+                if (_cachedItems.TryGetValue(dataPoint.Key, out IList<OpcUaDataPoint> value))
+                {
+                    value.Add(dataPoint);
+                }
+                else
+                {
+                    _cachedItems.TryAdd(dataPoint.Key, new List<OpcUaDataPoint> { dataPoint });
+                }
+
+                _logger.LogInformation($"Added Value {dataPoint.Value} for: {dataPoint.Key} and SourceTimestamp {dataPoint.SourceTimestamp:o}");
+            }
+        }
+
+        public async Task CheckForAlertsAsync(TimeSpan interval, CancellationToken cancellationToken)
+        {
+            while (true)
+            {
+                _logger.LogInformation("Starting alert check");
+
+                var alerts = new List<Alert>();
+
+                foreach (var dataPoint in _cachedItems)
+                {
+                    var monitoredItem = _monitoredItems.First(item => item.Key == dataPoint.Key);
+                    var avg = dataPoint.Value.Average(val => val.Value);
+
+                    if (avg >= (monitoredItem.ThresholdValue + monitoredItem.ToleranceHigh) ||
+                       avg <= (monitoredItem.ThresholdValue - monitoredItem.ToleranceLow))
+                    {
+                        _logger.LogInformation($"Detected alert condition for {dataPoint.Key} with average value {avg}");
+
+                        alerts.Add(new Alert
+                        {
+                            AlertType = AlertTypes.ThresholdViolation,
+                            ApplicationUri = monitoredItem.ApplicationUri,
+                            DisplayName = monitoredItem.DisplayName,
+                            AverageValue = avg,
+                            Timestamp = DateTime.UtcNow
+                        });
+                    }
+                }
+
+                if (alerts.Any())
+                {
+                    var alertAsJson = JsonConvert.SerializeObject(alerts);
+                    using var message = new Message(Encoding.UTF8.GetBytes(alertAsJson));
+                    await _moduleClientWrapper.SendEventAsync("output1", message);
+
+                    Console.WriteLine("Received message sent");
+                }
+
+                Task task = Task.Delay(interval, cancellationToken);
+
+                try
+                {
+                    await task;
+                }
+                catch (TaskCanceledException)
+                {
+                    return;
+                }
+            }
+        }
+
+        private bool IsMonitored(OpcUaDataPoint dataPoint)
+        {
+            return _monitoredItems.Any(item => item.ApplicationUri == dataPoint.ApplicationUri && item.NodeId == dataPoint.NodeId);
+        }
+
+        private bool Validate(IList<MonitoredItem> monitoredItems)
+        {
+            bool isValid = true;
+
+            var hasDupes = monitoredItems.GroupBy(item => item.Key).Any(group => group.Count() > 1);
+
+            if (hasDupes)
+            {
+                _logger.LogError("Check your Monitored Items configuration, you have duplicates!");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+    }
+}
