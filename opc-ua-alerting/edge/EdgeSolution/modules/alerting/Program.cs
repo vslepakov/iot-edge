@@ -17,7 +17,7 @@ namespace alerting
 
         static async Task Main(string[] args)
         {
-            Init().Wait();
+            await InitAsync();
 
             // Wait until the app unloads or is cancelled
             var cts = new CancellationTokenSource();
@@ -31,7 +31,7 @@ namespace alerting
         /// Initializes the ModuleClient and sets up the callback to receive
         /// messages containing temperature information
         /// </summary>
-        static async Task Init()
+        static async Task InitAsync()
         {
             MqttTransportSettings mqttSetting = new MqttTransportSettings(TransportType.Mqtt_Tcp_Only);
             ITransportSettings[] settings = { mqttSetting };
