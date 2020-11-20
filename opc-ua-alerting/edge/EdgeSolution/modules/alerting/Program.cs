@@ -14,10 +14,6 @@ namespace alerting
 
     class Program
     {
-        private static ILoggerFactory LoggerFactory = new LoggerFactory();
-
-        private static ILogger Logger = LoggerFactory.CreateLogger<Program>();
-
         private static AlertProcessor alertProcessor;
 
         static void Main(string[] args)
@@ -30,17 +26,6 @@ namespace alerting
             Console.CancelKeyPress += (sender, cpe) => cts.Cancel();
 
             alertProcessor.CheckForAlertsAsync(TimeSpan.FromMinutes(1), cts.Token).Wait();
-            //WhenCancelled(cts.Token).Wait();
-        }
-
-        /// <summary>
-        /// Handles cleanup operations when app is cancelled or unloads
-        /// </summary>
-        public static Task WhenCancelled(CancellationToken cancellationToken)
-        {
-            var tcs = new TaskCompletionSource<bool>();
-            cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).SetResult(true), tcs);
-            return tcs.Task;
         }
 
         /// <summary>
@@ -67,7 +52,7 @@ namespace alerting
             // Register callback to be called when a message is received by the module
             await ioTHubModuleClient.SetInputMessageHandlerAsync("opc-ua", HandleMessage, ioTHubModuleClient);
 
-            alertProcessor = new AlertProcessor(new ModuleClientWrapper(ioTHubModuleClient), Logger);
+            alertProcessor = new AlertProcessor(new ModuleClientWrapper(ioTHubModuleClient));
         }
 
         private static Task<MessageResponse> HandleMessage(Message message, object userContext)
@@ -102,13 +87,11 @@ namespace alerting
             {
                 foreach (Exception exception in ex.InnerExceptions)
                 {
-                    Console.WriteLine();
                     Console.WriteLine("Error when receiving desired property: {0}", exception);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine();
                 Console.WriteLine("Error when receiving desired property: {0}", ex.Message);
             }
             return Task.CompletedTask;

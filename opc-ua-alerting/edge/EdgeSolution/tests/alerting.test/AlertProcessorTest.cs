@@ -23,7 +23,6 @@ namespace alerting.test
         public async Task Alerts_Generated_For_Monitored_Items_Only_Values_Too_High()
         {
             IList<Alert> alertsToBeSent = null;
-            var logger = new Mock<ILogger>().Object;
             var moduleClientWrapperMock = GetModuleClientWrapperMock(alerts => alertsToBeSent = alerts);
 
             var monitoredItems = GetMonitoredItems();
@@ -32,7 +31,7 @@ namespace alerting.test
             var humidityValues = new double[] { 61, 60 };
             var dataPoints = GetDataPoints(tempValues, humidityValues);
 
-            var target = new AlertProcessor(moduleClientWrapperMock.Object, logger);
+            var target = new AlertProcessor(moduleClientWrapperMock.Object);
             var cts = new CancellationTokenSource();
             cts.Cancel();
 
@@ -51,7 +50,6 @@ namespace alerting.test
         public async Task Alerts_Generated_For_Monitored_Items_Only_Values_Too_Low()
         {
             IList<Alert> alertsToBeSent = null;
-            var logger = new Mock<ILogger>().Object;
             var moduleClientWrapperMock = GetModuleClientWrapperMock(alerts => alertsToBeSent = alerts);
 
             var monitoredItems = GetMonitoredItems();
@@ -60,7 +58,7 @@ namespace alerting.test
             var humidityValues = new double[] { 61, 60 };
             var dataPoints = GetDataPoints(tempValues, humidityValues);
 
-            var target = new AlertProcessor(moduleClientWrapperMock.Object, logger);
+            var target = new AlertProcessor(moduleClientWrapperMock.Object);
             var cts = new CancellationTokenSource();
             cts.Cancel();
 
@@ -79,7 +77,6 @@ namespace alerting.test
         public async Task Time_Series_Correctly_Cleaned_Up()
         {
             IList<Alert> alertsToBeSent = null;
-            var logger = new Mock<ILogger>().Object;
             var moduleClientWrapperMock = GetModuleClientWrapperMock(alerts => alertsToBeSent = alerts);
 
             var monitoredItems = GetMonitoredItems();
@@ -88,7 +85,7 @@ namespace alerting.test
             var humidityValues = new double[] { 61, 60 };
             var dataPoints = GetDataPoints(tempValues, humidityValues);
 
-            var target = new AlertProcessor(moduleClientWrapperMock.Object, logger);
+            var target = new AlertProcessor(moduleClientWrapperMock.Object);
             var cts = new CancellationTokenSource();
             cts.Cancel();
 

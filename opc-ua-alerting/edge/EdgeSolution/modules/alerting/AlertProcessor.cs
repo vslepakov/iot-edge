@@ -14,14 +14,12 @@ namespace alerting
     public class AlertProcessor
     {
         private readonly IModuleClientWrapper _moduleClientWrapper;
-        private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, IList<OpcUaDataPoint>> _cachedItems;
         IList<MonitoredItem> _monitoredItems;
 
-        public AlertProcessor(IModuleClientWrapper moduleClientWrapper, ILogger logger)
+        public AlertProcessor(IModuleClientWrapper moduleClientWrapper)
         {
             _moduleClientWrapper = moduleClientWrapper;
-            _logger = logger;
             _cachedItems = new ConcurrentDictionary<string, IList<OpcUaDataPoint>>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -30,11 +28,11 @@ namespace alerting
             if (Validate(monitoredItems))
             {
                 _monitoredItems = monitoredItems;
-                _logger.LogInformation("Successfully applied new Monitored Items configuration");
+                Console.WriteLine("Successfully applied new Monitored Items configuration");
             }
             else
             {
-                _logger.LogError("Failed to apply new Monitored Items configuration");
+                Console.WriteLine("Failed to apply new Monitored Items configuration");
             }
         }
 
@@ -51,7 +49,7 @@ namespace alerting
                     _cachedItems.TryAdd(dataPoint.Key, new List<OpcUaDataPoint> { dataPoint });
                 }
 
-                _logger.LogInformation($"Added Value {dataPoint.Value} for: {dataPoint.Key} and SourceTimestamp {dataPoint.SourceTimestamp:o}");
+                Console.WriteLine($"Added Value {dataPoint.Value} for: {dataPoint.Key} and SourceTimestamp {dataPoint.SourceTimestamp:o}");
             }
         }
 
@@ -59,7 +57,7 @@ namespace alerting
         {
             while (true)
             {
-                _logger.LogInformation("Starting alert check");
+                Console.WriteLine("Starting alert check");
 
                 var alerts = new List<Alert>();
 
@@ -74,7 +72,7 @@ namespace alerting
                         if (avg >= (monitoredItem.ThresholdValue + monitoredItem.ToleranceHigh) ||
                            avg <= (monitoredItem.ThresholdValue - monitoredItem.ToleranceLow))
                         {
-                            _logger.LogInformation($"Detected alert condition for {series.Key} with average value {avg}");
+                            Console.WriteLine($"Detected alert condition for {series.Key} with average value {avg}");
 
                             alerts.Add(new Alert
                             {
@@ -94,7 +92,7 @@ namespace alerting
                     using var message = new Message(Encoding.UTF8.GetBytes(alertAsJson));
                     await _moduleClientWrapper.SendEventAsync("output1", message);
 
-                    Console.WriteLine("Received message sent");
+                    Console.WriteLine("Alert message sent");
                 }
 
                 CleanUp();
@@ -134,7 +132,7 @@ namespace alerting
 
             if (hasDupes)
             {
-                _logger.LogError("Check your Monitored Items configuration, you have duplicates!");
+                Console.WriteLine("Check your Monitored Items configuration, you have duplicates!");
                 isValid = false;
             }
 
