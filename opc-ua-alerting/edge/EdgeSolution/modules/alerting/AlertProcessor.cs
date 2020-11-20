@@ -40,7 +40,7 @@ namespace alerting
 
         public void HandleNewValues(IList<OpcUaDataPoint> dataPoints)
         {
-            foreach (var dataPoint in dataPoints.Where(IsMonitored))
+            foreach (var dataPoint in dataPoints.Where(d => IsMonitored(d.Key)))
             {
                 if (_cachedItems.TryGetValue(dataPoint.Key, out IList<OpcUaDataPoint> value))
                 {
@@ -63,24 +63,28 @@ namespace alerting
 
                 var alerts = new List<Alert>();
 
-                foreach (var dataPoint in _cachedItems)
+                foreach (var series in _cachedItems)
                 {
-                    var monitoredItem = _monitoredItems.First(item => item.Key == dataPoint.Key);
-                    var avg = dataPoint.Value.Average(val => val.Value);
+                    var monitoredItem = _monitoredItems.FirstOrDefault(item => item.Key == series.Key);
 
-                    if (avg >= (monitoredItem.ThresholdValue + monitoredItem.ToleranceHigh) ||
-                       avg <= (monitoredItem.ThresholdValue - monitoredItem.ToleranceLow))
+                    if(monitoredItem != null)
                     {
-                        _logger.LogInformation($"Detected alert condition for {dataPoint.Key} with average value {avg}");
+                        var avg = series.Value.Average(val => val.Value);
 
-                        alerts.Add(new Alert
+                        if (avg >= (monitoredItem.ThresholdValue + monitoredItem.ToleranceHigh) ||
+                           avg <= (monitoredItem.ThresholdValue - monitoredItem.ToleranceLow))
                         {
-                            AlertType = AlertTypes.ThresholdViolation,
-                            ApplicationUri = monitoredItem.ApplicationUri,
-                            DisplayName = monitoredItem.DisplayName,
-                            AverageValue = avg,
-                            Timestamp = DateTime.UtcNow
-                        });
+                            _logger.LogInformation($"Detected alert condition for {series.Key} with average value {avg}");
+
+                            alerts.Add(new Alert
+                            {
+                                AlertType = AlertTypes.ThresholdViolation,
+                                ApplicationUri = monitoredItem.ApplicationUri,
+                                DisplayName = monitoredItem.DisplayName,
+                                AverageValue = avg,
+                                Timestamp = DateTime.UtcNow
+                            });
+                        }
                     }
                 }
 
@@ -92,6 +96,8 @@ namespace alerting
 
                     Console.WriteLine("Received message sent");
                 }
+
+                CleanUp();
 
                 Task task = Task.Delay(interval, cancellationToken);
 
@@ -106,10 +112,19 @@ namespace alerting
             }
         }
 
-        private bool IsMonitored(OpcUaDataPoint dataPoint)
+        private void CleanUp()
         {
-            return _monitoredItems.Any(item => item.ApplicationUri == dataPoint.ApplicationUri && item.NodeId == dataPoint.NodeId);
+            foreach(var series in _cachedItems.Where(d => !IsMonitored(d.Key)))
+            {
+                _cachedItems.TryRemove(series.Key, out IList<OpcUaDataPoint> dataPoints);
+            }
         }
+
+        private bool IsMonitored(string key)
+        {
+            return _monitoredItems.Any(item => item.Key == key);
+        }
+
 
         private bool Validate(IList<MonitoredItem> monitoredItems)
         {
