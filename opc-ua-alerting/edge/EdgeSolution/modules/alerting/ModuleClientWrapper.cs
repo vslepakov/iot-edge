@@ -15,6 +15,8 @@ namespace alerting
 
         public async Task SendEventAsync(string outputName, Message message)
         {
+            message.ContentEncoding = "utf-8";
+            message.ContentType = "application/json";
             await _moduleClient.SendEventAsync(outputName, message);
         }
 

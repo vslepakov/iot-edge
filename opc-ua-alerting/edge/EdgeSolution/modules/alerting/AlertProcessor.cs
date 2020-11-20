@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.Devices.Client;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -21,6 +20,7 @@ namespace alerting
         {
             _moduleClientWrapper = moduleClientWrapper;
             _cachedItems = new ConcurrentDictionary<string, IList<OpcUaDataPoint>>(StringComparer.OrdinalIgnoreCase);
+            _monitoredItems = new List<MonitoredItem>();
         }
 
         public void SetMonitoredItems(IList<MonitoredItem> monitoredItems)
@@ -28,16 +28,18 @@ namespace alerting
             if (Validate(monitoredItems))
             {
                 _monitoredItems = monitoredItems;
-                Console.WriteLine("Successfully applied new Monitored Items configuration");
+                Logger.LogInfo("Successfully applied new Monitored Items configuration");
             }
             else
             {
-                Console.WriteLine("Failed to apply new Monitored Items configuration");
+                Logger.LogInfo("Failed to apply new Monitored Items configuration");
             }
         }
 
         public void HandleNewValues(IList<OpcUaDataPoint> dataPoints)
         {
+            //Logger.LogInfo("Received new data points!");
+
             foreach (var dataPoint in dataPoints.Where(d => IsMonitored(d.Key)))
             {
                 if (_cachedItems.TryGetValue(dataPoint.Key, out IList<OpcUaDataPoint> value))
@@ -49,7 +51,7 @@ namespace alerting
                     _cachedItems.TryAdd(dataPoint.Key, new List<OpcUaDataPoint> { dataPoint });
                 }
 
-                Console.WriteLine($"Added Value {dataPoint.Value} for: {dataPoint.Key} and SourceTimestamp {dataPoint.SourceTimestamp:o}");
+                //Logger.LogInfo($"Added Value {dataPoint.Value} for: {dataPoint.Key} and SourceTimestamp {dataPoint.Value.SourceTimestamp:o}");
             }
         }
 
@@ -57,7 +59,7 @@ namespace alerting
         {
             while (true)
             {
-                Console.WriteLine("Starting alert check");
+                Logger.LogInfo("Starting alert check");
 
                 var alerts = new List<Alert>();
 
@@ -67,12 +69,12 @@ namespace alerting
 
                     if(monitoredItem != null)
                     {
-                        var avg = series.Value.Average(val => val.Value);
+                        var avg = series.Value.Average(val => val.Value.Value);
 
                         if (avg >= (monitoredItem.ThresholdValue + monitoredItem.ToleranceHigh) ||
                            avg <= (monitoredItem.ThresholdValue - monitoredItem.ToleranceLow))
                         {
-                            Console.WriteLine($"Detected alert condition for {series.Key} with average value {avg}");
+                            Logger.LogInfo($"Detected alert condition for {series.Key} with average value {avg}");
 
                             alerts.Add(new Alert
                             {
@@ -92,7 +94,7 @@ namespace alerting
                     using var message = new Message(Encoding.UTF8.GetBytes(alertAsJson));
                     await _moduleClientWrapper.SendEventAsync("output1", message);
 
-                    Console.WriteLine("Alert message sent");
+                    Logger.LogInfo("Alert message sent");
                 }
 
                 CleanUp();
@@ -101,7 +103,7 @@ namespace alerting
 
                 try
                 {
-                    await task;
+                    await task.ConfigureAwait(false);
                 }
                 catch (TaskCanceledException)
                 {
@@ -132,11 +134,43 @@ namespace alerting
 
             if (hasDupes)
             {
-                Console.WriteLine("Check your Monitored Items configuration, you have duplicates!");
+                Logger.LogError("Check your Monitored Items configuration, you have duplicates!");
                 isValid = false;
             }
 
             return isValid;
         }
+
+        #region Disposable
+
+        private bool _disposed = false;
+
+        ~AlertProcessor() => Dispose(false);
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            // Dispose of managed resources here.
+            if (disposing)
+            {
+                _moduleClientWrapper?.Dispose();
+            }
+
+            // Dispose of any unmanaged resources not wrapped in safe handles.
+
+            _disposed = true;
+        }
+
+        #endregion
     }
 }

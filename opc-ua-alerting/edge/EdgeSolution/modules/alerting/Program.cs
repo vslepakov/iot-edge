@@ -9,14 +9,13 @@ namespace alerting
     using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Client.Transport.Mqtt;
     using Microsoft.Azure.Devices.Shared;
-    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
     class Program
     {
         private static AlertProcessor alertProcessor;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Init().Wait();
 
@@ -25,7 +24,7 @@ namespace alerting
             AssemblyLoadContext.Default.Unloading += (ctx) => cts.Cancel();
             Console.CancelKeyPress += (sender, cpe) => cts.Cancel();
 
-            alertProcessor.CheckForAlertsAsync(TimeSpan.FromMinutes(1), cts.Token).Wait();
+            await alertProcessor.CheckForAlertsAsync(TimeSpan.FromMinutes(1), cts.Token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -38,21 +37,21 @@ namespace alerting
             ITransportSettings[] settings = { mqttSetting };
 
             // Open a connection to the Edge runtime
-            ModuleClient ioTHubModuleClient = await ModuleClient.CreateFromEnvironmentAsync(settings);
-            await ioTHubModuleClient.OpenAsync();
+            var ioTHubModuleClient = await ModuleClient.CreateFromEnvironmentAsync(settings);
+            await ioTHubModuleClient.OpenAsync().ConfigureAwait(false);
 
-            Console.WriteLine("IoT Hub module client initialized.");
-
-            var moduleTwin = await ioTHubModuleClient.GetTwinAsync();
-            await OnDesiredPropertiesUpdate(moduleTwin.Properties.Desired, ioTHubModuleClient);
-
-            // Attach a callback for updates to the module twin's desired properties.
-            await ioTHubModuleClient.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertiesUpdate, null);
-
-            // Register callback to be called when a message is received by the module
-            await ioTHubModuleClient.SetInputMessageHandlerAsync("opc-ua", HandleMessage, ioTHubModuleClient);
+            Logger.LogInfo("IoT Hub module client initialized.");
 
             alertProcessor = new AlertProcessor(new ModuleClientWrapper(ioTHubModuleClient));
+
+            // Register callback to be called when a message is received by the module
+            await ioTHubModuleClient.SetInputMessageHandlerAsync("opc-ua", HandleMessage, ioTHubModuleClient).ConfigureAwait(false);
+
+            var moduleTwin = await ioTHubModuleClient.GetTwinAsync().ConfigureAwait(false);
+            await OnDesiredPropertiesUpdate(moduleTwin.Properties.Desired, ioTHubModuleClient).ConfigureAwait(false);
+
+            // Attach a callback for updates to the module twin's desired properties.
+            await ioTHubModuleClient.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertiesUpdate, null).ConfigureAwait(false);
         }
 
         private static Task<MessageResponse> HandleMessage(Message message, object userContext)
@@ -61,7 +60,7 @@ namespace alerting
             var messageString = Encoding.UTF8.GetString(messageBytes);
             var dataPoints = JsonConvert.DeserializeObject<IList<OpcUaDataPoint>>(messageString);
 
-            if(dataPoints != null)
+            if (dataPoints != null)
             {
                 alertProcessor.HandleNewValues(dataPoints);
             }
@@ -69,16 +68,16 @@ namespace alerting
             return Task.FromResult(MessageResponse.Completed);
         }
 
-        static Task OnDesiredPropertiesUpdate(TwinCollection desiredProperties, object userContext)
+        private static Task OnDesiredPropertiesUpdate(TwinCollection desiredProperties, object userContext)
         {
             try
             {
-                Console.WriteLine("Desired property change:");
-                Console.WriteLine(JsonConvert.SerializeObject(desiredProperties));
+                Logger.LogInfo("Desired property change:");
+                Logger.LogInfo(JsonConvert.SerializeObject(desiredProperties));
 
                 if (desiredProperties["MonitoredItems"] != null)
                 {
-                    var monitoredItemsProperty = desiredProperties["MonitoredItems"];
+                    var monitoredItemsProperty = desiredProperties["MonitoredItems"].ToString();
                     var monitoredItems = JsonConvert.DeserializeObject<IList<MonitoredItem>>(monitoredItemsProperty);
                     alertProcessor.SetMonitoredItems(monitoredItems);
                 }
@@ -87,14 +86,24 @@ namespace alerting
             {
                 foreach (Exception exception in ex.InnerExceptions)
                 {
-                    Console.WriteLine("Error when receiving desired property: {0}", exception);
+                    Logger.LogError($"Error when receiving desired property: {exception}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error when receiving desired property: {0}", ex.Message);
+                Logger.LogError($"Error when receiving desired property: {ex}");
             }
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Handles cleanup operations when app is cancelled or unloads
+        /// </summary>
+        public static Task WhenCancelled(CancellationToken cancellationToken)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).SetResult(true), tcs);
+            return tcs.Task;
         }
     }
 }

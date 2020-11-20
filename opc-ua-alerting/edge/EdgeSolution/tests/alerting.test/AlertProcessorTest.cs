@@ -142,8 +142,11 @@ namespace alerting.test
                     ApplicationUri = "TestServer2Uri",
                     NodeId = "FakeNode",
                     DisplayName = "FakeNode",
-                    SourceTimestamp = DateTime.Now,
-                    Value = 600
+                    Value = new OpcUaValue
+                    {
+                        SourceTimestamp = DateTime.Now,
+                        Value = 600
+                    }
                 }
             };
 
@@ -154,8 +157,11 @@ namespace alerting.test
                     ApplicationUri = ApplicationUri1,
                     NodeId = TempNode,
                     DisplayName = TempNode,
-                    SourceTimestamp = DateTime.Now.AddSeconds(index * -1),
-                    Value = tempValues[index]
+                    Value = new OpcUaValue
+                    {
+                        SourceTimestamp = DateTime.Now.AddSeconds(index * -1),
+                        Value = tempValues[index]
+                    }
                 });
             }
 
@@ -166,8 +172,11 @@ namespace alerting.test
                     ApplicationUri = ApplicationUri1,
                     NodeId = HumidityNode,
                     DisplayName = HumidityNode,
-                    SourceTimestamp = DateTime.Now.AddSeconds(index * -1),
-                    Value = humidityValues[index]
+                    Value = new OpcUaValue
+                    {
+                        SourceTimestamp = DateTime.Now.AddSeconds(index * -1),
+                        Value = humidityValues[index]
+                    }
                 });
             }
 
