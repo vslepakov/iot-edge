@@ -12,7 +12,7 @@ namespace alerting
 
         public string ApplicationUri { get; set; }
 
-        public string Key => $"{ApplicationUri}_{NodeId}";
+        public string Key => $"{ApplicationUri}_{DisplayName}";
     }
 
     public class OpcUaValue

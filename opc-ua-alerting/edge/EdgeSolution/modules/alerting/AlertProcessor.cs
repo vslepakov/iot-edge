@@ -51,7 +51,7 @@ namespace alerting
                     _cachedItems.TryAdd(dataPoint.Key, new List<OpcUaDataPoint> { dataPoint });
                 }
 
-                //Logger.LogInfo($"Added Value {dataPoint.Value} for: {dataPoint.Key} and SourceTimestamp {dataPoint.Value.SourceTimestamp:o}");
+                Logger.LogInfo($"Added Value {dataPoint.Value} for: {dataPoint.Key} and SourceTimestamp {dataPoint.Value.SourceTimestamp:o}");
             }
         }
 
