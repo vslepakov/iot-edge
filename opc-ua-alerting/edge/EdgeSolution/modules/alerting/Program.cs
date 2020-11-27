@@ -56,16 +56,27 @@ namespace alerting
 
         private static Task<MessageResponse> HandleMessage(Message message, object userContext)
         {
-            var messageBytes = message.GetBytes();
-            var messageString = Encoding.UTF8.GetString(messageBytes);
-            var dataPoints = JsonConvert.DeserializeObject<IList<OpcUaDataPoint>>(messageString);
-
-            if (dataPoints != null)
+            try
             {
-                alertProcessor.HandleNewValues(dataPoints);
-            }
+                var messageBytes = message.GetBytes();
+                var messageString = Encoding.UTF8.GetString(messageBytes);
 
-            return Task.FromResult(MessageResponse.Completed);
+                Logger.LogInfo($"Received new data points! {messageString}");
+
+                var dataPoints = JsonConvert.DeserializeObject<IList<OpcUaDataPoint>>(messageString);
+
+                if (dataPoints != null)
+                {
+                    alertProcessor.HandleNewValues(dataPoints);
+                }
+
+                return Task.FromResult(MessageResponse.Completed);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error when receiving new data: {ex}");
+                throw;
+            }
         }
 
         private static Task OnDesiredPropertiesUpdate(TwinCollection desiredProperties, object userContext)

@@ -38,8 +38,6 @@ namespace alerting
 
         public void HandleNewValues(IList<OpcUaDataPoint> dataPoints)
         {
-            //Logger.LogInfo("Received new data points!");
-
             foreach (var dataPoint in dataPoints.Where(d => IsMonitored(d.Key)))
             {
                 if (_cachedItems.TryGetValue(dataPoint.Key, out IList<OpcUaDataPoint> value))
