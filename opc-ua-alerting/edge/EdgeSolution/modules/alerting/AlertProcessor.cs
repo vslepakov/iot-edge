@@ -112,9 +112,16 @@ namespace alerting
 
         private void CleanUp()
         {
-            foreach(var series in _cachedItems.Where(d => !IsMonitored(d.Key)))
+            foreach(var series in _cachedItems)
             {
-                _cachedItems.TryRemove(series.Key, out IList<OpcUaDataPoint> dataPoints);
+                if (IsMonitored(series.Key))
+                {
+                    _cachedItems[series.Key] = new List<OpcUaDataPoint>();
+                }
+                else
+                {
+                    _cachedItems.TryRemove(series.Key, out IList<OpcUaDataPoint> dataPoints);
+                }
             }
         }
 

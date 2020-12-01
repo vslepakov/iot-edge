@@ -74,7 +74,7 @@ namespace alerting.test
         }
 
         [TestMethod]
-        public async Task Time_Series_Correctly_Cleaned_Up()
+        public async Task Unmonitored_Time_Series_Correctly_Cleaned_Up()
         {
             IList<Alert> alertsToBeSent = null;
             var moduleClientWrapperMock = GetModuleClientWrapperMock(alerts => alertsToBeSent = alerts);
@@ -104,6 +104,37 @@ namespace alerting.test
             Assert.AreEqual(1, alertsToBeSent.Count);
             Assert.AreEqual(ApplicationUri1, alertsToBeSent.First().ApplicationUri);
             Assert.AreEqual(TempNode, alertsToBeSent.First().DisplayName);
+        }
+
+        [TestMethod]
+        public async Task Time_Series_Correctly_Cleaned_Up()
+        {
+            IList<Alert> alertsToBeSent = null;
+            var moduleClientWrapperMock = GetModuleClientWrapperMock(alerts => alertsToBeSent = alerts);
+
+            var target = new AlertProcessor(moduleClientWrapperMock.Object);
+            var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            var monitoredItems = GetMonitoredItems();
+            var dataPoints = GetDataPoints(new double[] { 100, 90 }, new double[] { 100, 100 });
+
+            target.SetMonitoredItems(monitoredItems);
+            target.HandleNewValues(dataPoints);
+            await target.CheckForAlertsAsync(TimeSpan.Zero, cts.Token);
+
+            var tempValues = new double[] { 22, 21 };
+            var humidityValues = new double[] { 61, 60 };
+            var newDataPoints = GetDataPoints(tempValues, humidityValues);
+
+            target.HandleNewValues(newDataPoints);
+            await target.CheckForAlertsAsync(TimeSpan.Zero, cts.Token);
+
+            Assert.IsNotNull(alertsToBeSent);
+            Assert.AreEqual(2, alertsToBeSent.Count);
+            Assert.AreEqual(ApplicationUri1, alertsToBeSent.First().ApplicationUri);
+            Assert.AreEqual(tempValues.Average(), alertsToBeSent.Single(a => a.DisplayName == TempNode).AverageValue, 0.00001);
+            Assert.AreEqual(humidityValues.Average(), alertsToBeSent.Single(a => a.DisplayName == HumidityNode).AverageValue, 0.00001);
         }
 
         #region Helpers
