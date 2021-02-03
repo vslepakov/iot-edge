@@ -64,16 +64,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "${MODULES.OrdersApi}",
-              "createOptions": {
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                },
-                "HostConfig": {
-                  "NetworkMode": "host"
-                }
-              }
+              "createOptions": ""
             }
           },
           "Redis": {
@@ -103,16 +94,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "${MODULES.OrdersApiClient}",
-              "createOptions": {
-                "NetworkingConfig": {
-                  "EndpointsConfig": {
-                    "host": {}
-                  }
-                },
-                "HostConfig": {
-                  "NetworkMode": "host"
-                }
-              }
+              "createOptions": ""
             }
           }
         }

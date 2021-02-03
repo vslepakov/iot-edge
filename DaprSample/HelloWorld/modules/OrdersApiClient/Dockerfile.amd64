@@ -13,7 +13,7 @@ RUN apt-get update \
     && apt-get install -y wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget https://github.com/dapr/dapr/releases/download/v0.3.0/daprd_linux_amd64.tar.gz
+RUN wget https://github.com/dapr/dapr/releases/download/v0.8.0/daprd_linux_amd64.tar.gz
 RUN tar -zxvf daprd_linux_amd64.tar.gz
 
 ENV PATH /app:$PATH
