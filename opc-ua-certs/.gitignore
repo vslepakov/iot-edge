@@ -1,0 +1,8 @@
+serial
+*.txt
+certs
+csr
+newcerts
+private
+*.attr
+*.old
