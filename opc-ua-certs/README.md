@@ -1,11 +1,15 @@
 # Some Context
 Please refer to [this blog post](ADD LINK) for details.
 
-## Step 1: Generate Root and Intermediate Certificates
+## Step 1
+
+Clone this repo. It is important that ```iiot_certs_openssl.cnf``` is in the same directory as the ```certGen.sh``` script.
+
+## Step 2: Generate Root and Intermediate Certificates
 
 ```./certGen.sh create_root_and_intermediate```
 
-## Step 2: Generate OPC UA Application Instance Certificate
+## Step 3: Generate OPC UA Application Instance Certificate
 
 ```./certGen.sh create_opcua_certificate <GATEWAY_HOSTNAME> <COMMON_NAME>```
 
