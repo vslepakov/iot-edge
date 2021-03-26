@@ -87,7 +87,7 @@ function prepare_filesystem()
     touch ${CERTIFICATE_DIR}/index.txt
 
     rm -f ${CERTIFICATE_DIR}/serial
-    echo 1000 > ${CERTIFICATE_DIR}/serial
+    echo 1e3d9236c93cacbdb14b8511242247e04349bb4b > ${CERTIFICATE_DIR}/serial
 }
 
 ###############################################################################
