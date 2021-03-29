@@ -95,7 +95,7 @@ function prepare_filesystem()
 ###############################################################################
 function generate_root_ca()
 {
-    local common_name="/CN=Azure_IIoT_CA_Cert_Test_Only"
+    local common_name="Azure_IIoT_CA_Cert_Test_Only"
     local password_cmd=" -aes256 -passout pass:${ROOT_CA_PASSWORD} "
 
     local key_file=${CERTIFICATE_DIR}/private/${ROOT_CA_PREFIX}.key.pem
