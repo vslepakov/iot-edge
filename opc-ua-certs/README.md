@@ -1,5 +1,5 @@
 # Some Context
-Please refer to [this blog post](ADD LINK) for details.
+Please refer to [this blog post](https://vslepakov.medium.com/custom-x509-certificates-with-opc-publisher-73a0127bf884) for details.
 
 ## Step 1
 
